@@ -6,6 +6,7 @@
 
 		<script src="js/steganos.js"></script>
 		<script src="js/image.js"></script>
+
 		<script>
 		var image;
 		function encode(){
@@ -14,7 +15,6 @@
 				image.chunks.test = steganos.stringToBytes(text);
 				image.write();
 				var dataUri = image.getDataUri();
-				console.log(dataUri);
 				document.getElementById("image").src = dataUri;
 			}catch(err){
 				alert(err);
@@ -23,28 +23,30 @@
 		function decode(){
 			try {
 				image.read();
-				console.log(image.chunks);
 				alert(steganos.bytesToString(image.chunks.test));
 			}catch(err){
 				alert(err);
 			}
 		}
 		function load(){
-			console.log("d");
-			var url = document.getElementById("url").value;
-			
-		  	var img = new Image();
-		  	console.log("Loading image");
-		  	img.src = url;
-		  	img.onload = function(){
-		  		console.log("Loaded");
-			    try{
-				    image = new steganos.Image(img);
-				    image.allocChunk("test", []);
-			    }catch(err){
-			    	alert(err);
-			    }
-		  	};
+			var files = document.getElementById("imageSelect").files;
+			if(files.length < 1){
+				alert("No image selected");
+				return;
+			}
+			try {
+				var reader = new FileReader();
+				reader.onload = function(event){
+					var str = event.target.result.replace(steganos.DATA_URI_JPG_START, "");
+					var bytes = steganos.base64ToBytes(str);
+					image = new steganos.Image(bytes);
+					image.allocChunk("test", []);
+					document.getElementById("image").src = image.getDataUri();
+				}
+				reader.readAsDataURL(files[0]);
+			}catch(err){
+				alert(err);
+			}
 		}
 		</script>
 	</head>
@@ -55,7 +57,7 @@
 				<h1>steganos test</h1>
 			</header>
 
-			<input type="text" id="url" value="test.png" /> <br/> 
+			<input type="file" id="imageSelect" /> <br/> 
 			<a onclick="load()">Load</a><br/>
 			<input type="text" id="box" value="encrypted" /> <br />	
 
