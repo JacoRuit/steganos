@@ -37,6 +37,10 @@
 			try {
 				var reader = new FileReader();
 				reader.onload = function(event){
+					if(event.target.result.indexOf(steganos.DATA_URI_JPG_START) < 0){
+						alert("Please choose a .jpg file");
+						return;
+					}
 					var str = event.target.result.replace(steganos.DATA_URI_JPG_START, "");
 					var bytes = steganos.base64ToBytes(str);
 					image = new steganos.Image(bytes);
